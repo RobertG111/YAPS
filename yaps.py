@@ -12,6 +12,7 @@ data = parser.add_argument("-d", "--data", help="Data", required=True)
 cookie = parser.add_argument("-c", "--cookie", help="Cookie <name=data>", required=False, default=None)
 header = parser.add_argument("-H", "--header", help="Header Data", required=False, default=None)
 timeout = parser.add_argument("-t", "--timeout", help="Timeout", required=False, default=1)
+verbose = parser.add_argument("-v", "--verbose", help="Verbose", required=False, default=True)
 
 # Read arguments from command line
 args = parser.parse_args()
@@ -76,17 +77,22 @@ try:
  
     # Send requests
     def sendRequest(data):
-        print("Sending request... " + str(data))
-        
+
         # Default
         if(args.cookie == None and args.header == None):   
-            requests.post(args.site, data=data, timeout=timeout)
+            r = requests.post(args.site, data=data, timeout=timeout)
         elif(args.cookie != None and args.header == None):   
-            requests.post(args.site, data=data, cookies=cookie, timeout=timeout)
+            r = requests.post(args.site, data=data, cookies=cookie, timeout=timeout)
         elif(args.cookie == None and args.header != None):        
-            requests.post(args.site, data=data, headers=header, timeout=timeout)
+            r = requests.post(args.site, data=data, headers=header, timeout=timeout)
         elif(args.cookie != None and args.header != None):
-            requests.post(args.site, data=data, cookies=cookie, headers=header, timeout=timeout)    
+            r = requests.post(args.site, data=data, cookies=cookie, headers=header, timeout=timeout)    
+    
+        # Print response
+        if(r.reason == "OK" and r.status_code == 200 and args.verbose == True):
+            print("Request sent successfully - " + str(data))
+        else:
+            print("Request failed - " + r.reason + " - Status Code - " + str(r.status_code))
     
     # Reading files
     while True:
